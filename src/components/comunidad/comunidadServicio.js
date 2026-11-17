@@ -1,5 +1,3 @@
-// Servicio del módulo Comunidad (Célula 6).
-// HU 6.3.2: persistencia del favorito para el usuario autenticado.
 
 const CONFIG = {
   urlBase: "https://6ada65937512f497b3ffea29.mockapi.io/api/v1",
@@ -19,7 +17,7 @@ const MENSAJES_ERROR = {
   [TIPO_ERROR.SERVIDOR]: "El servidor no pudo procesar la solicitud. Intenta más tarde.",
 };
 
-// Error tipado: la UI muestra error.message sin conocer detalles del fetch.
+
 export class ErrorComunidad extends Error {
   constructor(tipo, causa) {
     super(MENSAJES_ERROR[tipo]);
@@ -51,7 +49,7 @@ async function requestApi(ruta, opciones) {
   try {
     respuesta = await fetch(CONFIG.urlBase + ruta, opciones);
   } catch (error) {
-    // fetch solo rechaza por fallos de red (DNS, CORS, sin internet).
+    
     throw new ErrorComunidad(TIPO_ERROR.CONEXION, error);
   }
 
@@ -64,9 +62,7 @@ async function requestApi(ruta, opciones) {
   return respuesta.status === 204 ? null : respuesta.json();
 }
 
-// Se pide la lista completa (siempre 200) y se filtra en cliente:
-// el filtro de MockAPI responde 404 cuando no hay coincidencias y
-// el navegador lo registra como error en consola.
+
 async function buscarFavorito(idUsuario, idReceta) {
   const lista = await requestApi(CONFIG.rutaFavoritos, { method: "GET" });
   return (
@@ -105,8 +101,7 @@ async function esFavorito(idReceta) {
 }
 
 /**
- * Registra o remueve la receta de los favoritos del usuario autenticado.
- * Consulta primero al servidor para no duplicar registros.
+
  * @returns {Promise<boolean>} nuevo estado (true = guardada)
  */
 async function alternarFavorito(idReceta) {

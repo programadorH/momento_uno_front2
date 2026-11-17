@@ -11,7 +11,7 @@ function mensajeDeError(error) {
   };
 }
 
-// Estado del botón de favorito conectado a comunidadService (HU 6.3.2).
+
 export function useFavorito(idReceta) {
   const idValido = Number.isInteger(idReceta);
 
@@ -20,7 +20,7 @@ export function useFavorito(idReceta) {
   const [procesando, setProcesando] = useState(false);
   const [mensaje, setMensaje] = useState(SIN_MENSAJE);
 
-  // Estado inicial desde el servidor.
+ 
   useEffect(() => {
     if (!idValido) return;
     let vigente = true;
@@ -46,7 +46,7 @@ export function useFavorito(idReceta) {
     if (procesando || !idValido) return;
 
     const estadoAnterior = guardado;
-    // Actualización optimista: el botón cambia al instante, sin recargar.
+   
     setGuardado(!estadoAnterior);
     setProcesando(true);
     setMensaje(SIN_MENSAJE);
@@ -61,7 +61,7 @@ export function useFavorito(idReceta) {
         esError: false,
       });
     } catch (error) {
-      // Si falla la conexión o la sesión, se revierte el cambio visual.
+      
       setGuardado(estadoAnterior);
       setMensaje(mensajeDeError(error));
     } finally {
