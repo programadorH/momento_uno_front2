@@ -4,8 +4,8 @@ import "./BotonFavorito.css";
 const CLASE_BASE = "comunidad-btn-favorito";
 const CLASE_ACTIVO = "comunidad-btn-favorito--activo";
 
-function BotonFavorito({ idUsuario, idReceta }) {
-  const { guardado, cargando, mensaje, alternar } = useFavorito(idUsuario, idReceta);
+function BotonFavorito({ idReceta }) {
+  const { guardado, bloqueado, mensaje, alternar } = useFavorito(idReceta);
 
   const clases = guardado ? `${CLASE_BASE} ${CLASE_ACTIVO}` : CLASE_BASE;
 
@@ -15,7 +15,7 @@ function BotonFavorito({ idUsuario, idReceta }) {
         type="button"
         className={clases}
         onClick={alternar}
-        disabled={cargando}
+        disabled={bloqueado}
         aria-pressed={guardado}
       >
         <span className="comunidad-btn-favorito__corazon" aria-hidden="true"></span>

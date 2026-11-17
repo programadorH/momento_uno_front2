@@ -12,7 +12,7 @@ function Valoracion() {
 
       <section className="bloque-modulo" aria-labelledby="favorito-titulo">
         <h2 id="favorito-titulo">Favoritos</h2>
-        <BotonFavorito idUsuario={1} idReceta={3} />
+        <BotonFavorito idReceta={3} />
       </section>
     </section>
   );
