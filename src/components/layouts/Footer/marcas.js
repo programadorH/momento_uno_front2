@@ -1,5 +1,3 @@
-// Marcas de la familia Nutresa que se muestran en el footer.
-// Vite resuelve cada import a la URL final del archivo.
 import zenu from "../../../assets/marcas/zenu.png";
 import doria from "../../../assets/marcas/doria.png";
 import noel from "../../../assets/marcas/noel.svg";

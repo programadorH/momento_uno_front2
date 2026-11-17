@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { comunidadService } from "../comunidadServicio";
 
-// Migrado de iniciarComunidad() en modulos/comunidad/index.js
+
 function EstadoComunidad() {
   const [estado, setEstado] = useState({ texto: "", esError: false });
 

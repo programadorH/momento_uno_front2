@@ -10,7 +10,7 @@ if (typeof localStorage !== 'undefined' && typeof document !== 'undefined') {
 
 
 function toggleSidebar() {
-  // Si React ya expuso su toggleSidebar reactivo, llamarlo
+  
   if (typeof window !== 'undefined' && typeof window.toggleSidebar === 'function' && window.toggleSidebar !== toggleSidebar) {
     window.toggleSidebar();
     return;
