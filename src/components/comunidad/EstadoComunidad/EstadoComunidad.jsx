@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listarTodos } from "../comunidadServicio";
+import { comunidadService } from "../comunidadServicio";
 
 // Migrado de iniciarComunidad() en modulos/comunidad/index.js
 function EstadoComunidad() {
@@ -7,17 +7,17 @@ function EstadoComunidad() {
 
   useEffect(() => {
     let vigente = true;
-    listarTodos()
+    comunidadService
+      .listarTodos()
       .then(() => {
         if (vigente) {
           setEstado({ texto: "Estructura base del módulo comunidad cargada.", esError: false });
         }
       })
-      .catch((error) => {
+      .catch(() => {
         if (vigente) {
           setEstado({ texto: "No fue posible cargar la base de comunidad.", esError: true });
         }
-        console.error(error);
       });
     return () => {
       vigente = false;

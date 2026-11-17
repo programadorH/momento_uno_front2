@@ -1,16 +1,49 @@
-# React + Vite
+# Momento 1 - Frontend II (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Proyecto académico desarrollado para el **Momento 1** del módulo **Frontend II** en **CESDE**. La aplicación está construida con React y Vite bajo una arquitectura modular orientada a componentes reutilizables, enfocada en la gestión de vistas y funcionalidades del módulo de **Comunidad y Valoraciones**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🛠️ Tecnologías Utilizadas
 
-## React Compiler
+* **React** (Biblioteca principal de interfaz de usuario)
+* **Vite** (Entorno de desarrollo y empaquetador)
+* **JavaScript (ES6+)**
+* **CSS3** (Estilos globales y hojas de estilo personalizadas)
+* **Git / GitHub** (Control de versiones y flujo de trabajo por ramas *feature*)
+* **ESLint** (Control de calidad y formato de código)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🌿 Flujo de Ramas y Desarrollo Activo
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+El desarrollo sigue una estrategia basada en ramas de funcionalidades (*feature branches*) derivadas de `main`:
+
+* **`main`**: Rama principal estable del proyecto.
+* **`feature/comunidad/G6-FAV-F01-boton`**: Rama activa de desarrollo correspondiente al **Grupo 6** (módulo de Comunidad), centrada en la implementación y estilización del componente interactivo de botón de acción/favoritos (`FAV-F01`) y su integración dentro de las vistas del sistema.
+
+---
+
+## 📂 Estructura del Proyecto
+
+```text
+momento_uno_front2/
+├── public/
+│   └── icons.svg
+├── src/
+│   ├── assets/
+│   │   └── estilos.css
+│   ├── components/
+│   │   ├── Header.jsx
+│   │   ├── Footer.jsx
+│   │   └── pages/
+│   │       └── Valoracion/
+│   │           └── Valoracion.jsx
+│   ├── js/
+│   │   └── globals.js
+│   ├── App.jsx
+│   ├── index.css
+│   └── main.jsx
+├── index.html
+├── package.json
+└── vite.config.js

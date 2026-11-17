@@ -1,65 +1,129 @@
-// Servicio del módulo Comunidad (migrado de modulos/comunidad/servicio.js).
-// Antes vivía en window.comunidadServicio; ahora se exporta como módulo ES.
+// Servicio del módulo Comunidad (Célula 6).
+// HU 6.3.2: persistencia del favorito para el usuario autenticado.
 
 const CONFIG = {
   urlBase: "https://6ada65937512f497b3ffea29.mockapi.io/api/v1",
   rutaFavoritos: "/favoritos",
+  claveSesion: "sazon_sesion_activa",
 };
 
-async function requestApi(ruta, opciones) {
-  const respuesta = await fetch(CONFIG.urlBase + ruta, opciones);
-  if (!respuesta.ok) {
-    const error = new Error("Error en API de comunidad: " + respuesta.status);
-    error.status = respuesta.status;
-    throw error;
+export const TIPO_ERROR = {
+  CONEXION: "conexion",
+  SESION: "sesion",
+  SERVIDOR: "servidor",
+};
+
+const MENSAJES_ERROR = {
+  [TIPO_ERROR.CONEXION]: "Sin conexión con el servidor. Revisa tu internet e intenta de nuevo.",
+  [TIPO_ERROR.SESION]: "Tu sesión no es válida. Inicia sesión para guardar favoritos.",
+  [TIPO_ERROR.SERVIDOR]: "El servidor no pudo procesar la solicitud. Intenta más tarde.",
+};
+
+// Error tipado: la UI muestra error.message sin conocer detalles del fetch.
+export class ErrorComunidad extends Error {
+  constructor(tipo, causa) {
+    super(MENSAJES_ERROR[tipo]);
+    this.name = "ErrorComunidad";
+    this.tipo = tipo;
+    this.cause = causa;
   }
-  if (respuesta.status === 204) {
-    return null;
-  }
-  return respuesta.json();
 }
 
-function coincide(favorito, idUsuario, idReceta) {
+function obtenerUsuarioSesion() {
+  let sesion;
+  try {
+    sesion = JSON.parse(localStorage.getItem(CONFIG.claveSesion));
+  } catch {
+    sesion = null;
+  }
+  if (!sesion || !Number.isInteger(Number(sesion.id))) {
+    throw new ErrorComunidad(TIPO_ERROR.SESION);
+  }
+  return { ...sesion, id: Number(sesion.id) };
+}
+
+async function requestApi(ruta, opciones) {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    throw new ErrorComunidad(TIPO_ERROR.CONEXION);
+  }
+
+  let respuesta;
+  try {
+    respuesta = await fetch(CONFIG.urlBase + ruta, opciones);
+  } catch (error) {
+    // fetch solo rechaza por fallos de red (DNS, CORS, sin internet).
+    throw new ErrorComunidad(TIPO_ERROR.CONEXION, error);
+  }
+
+  if (respuesta.status === 401 || respuesta.status === 403) {
+    throw new ErrorComunidad(TIPO_ERROR.SESION);
+  }
+  if (!respuesta.ok) {
+    throw new ErrorComunidad(TIPO_ERROR.SERVIDOR, respuesta.status);
+  }
+  return respuesta.status === 204 ? null : respuesta.json();
+}
+
+// Se pide la lista completa (siempre 200) y se filtra en cliente:
+// el filtro de MockAPI responde 404 cuando no hay coincidencias y
+// el navegador lo registra como error en consola.
+async function buscarFavorito(idUsuario, idReceta) {
+  const lista = await requestApi(CONFIG.rutaFavoritos, { method: "GET" });
   return (
-    Number(favorito.idUsuario) === Number(idUsuario) &&
-    Number(favorito.idReceta) === Number(idReceta)
+    lista.find(
+      (item) =>
+        Number(item.idUsuario) === idUsuario && Number(item.idReceta) === idReceta
+    ) || null
   );
 }
 
-export async function listarTodos() {
-  return [];
-}
-
-export async function consultarFavorito(idUsuario, idReceta) {
-  const filtros = new URLSearchParams({ idUsuario, idReceta });
-  try {
-    const lista = await requestApi(`${CONFIG.rutaFavoritos}?${filtros}`, {
-      method: "GET",
-    });
-    return lista.find((item) => coincide(item, idUsuario, idReceta)) || null;
-  } catch (error) {
-    // MockAPI responde 404 cuando el filtro no encuentra resultados.
-    if (error.status === 404) {
-      return null;
-    }
-    throw error;
-  }
-}
-
-export async function agregarFavorito(idUsuario, idReceta) {
+function agregarFavorito(idUsuario, idReceta) {
   return requestApi(CONFIG.rutaFavoritos, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      idUsuario: Number(idUsuario),
-      idReceta: Number(idReceta),
+      idUsuario,
+      idReceta,
       guardadoEn: new Date().toISOString(),
     }),
   });
 }
 
-export async function eliminarFavorito(idFavorito) {
-  return requestApi(`${CONFIG.rutaFavoritos}/${idFavorito}`, {
-    method: "DELETE",
-  });
+function eliminarFavorito(idFavorito) {
+  return requestApi(`${CONFIG.rutaFavoritos}/${idFavorito}`, { method: "DELETE" });
 }
+
+async function listarTodos() {
+  return [];
+}
+
+/** @returns {Promise<boolean>} true si la receta está en favoritos del usuario en sesión */
+async function esFavorito(idReceta) {
+  const usuario = obtenerUsuarioSesion();
+  const favorito = await buscarFavorito(usuario.id, Number(idReceta));
+  return favorito !== null;
+}
+
+/**
+ * Registra o remueve la receta de los favoritos del usuario autenticado.
+ * Consulta primero al servidor para no duplicar registros.
+ * @returns {Promise<boolean>} nuevo estado (true = guardada)
+ */
+async function alternarFavorito(idReceta) {
+  const usuario = obtenerUsuarioSesion();
+  const id = Number(idReceta);
+  const existente = await buscarFavorito(usuario.id, id);
+
+  if (existente) {
+    await eliminarFavorito(existente.id);
+    return false;
+  }
+  await agregarFavorito(usuario.id, id);
+  return true;
+}
+
+export const comunidadService = {
+  listarTodos,
+  esFavorito,
+  alternarFavorito,
+};

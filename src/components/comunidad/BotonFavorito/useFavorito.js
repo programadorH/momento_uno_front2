@@ -1,76 +1,87 @@
 import { useEffect, useState } from "react";
-import {
-  consultarFavorito,
-  agregarFavorito,
-  eliminarFavorito,
-} from "../comunidadServicio";
+import { comunidadService, ErrorComunidad } from "../comunidadServicio";
 
 const SIN_MENSAJE = { texto: "", esError: false };
+const ERROR_GENERICO = "Ocurrió un error inesperado. Intenta de nuevo.";
 
-// Estado del botón de favorito conectado al servicio de Comunidad.
-export function useFavorito(idUsuario, idReceta) {
-  const idsValidos = Number.isInteger(idUsuario) && Number.isInteger(idReceta);
+function mensajeDeError(error) {
+  return {
+    texto: error instanceof ErrorComunidad ? error.message : ERROR_GENERICO,
+    esError: true,
+  };
+}
 
-  const [favorito, setFavorito] = useState(null);
-  const [cargando, setCargando] = useState(idsValidos);
+// Estado del botón de favorito conectado a comunidadService (HU 6.3.2).
+export function useFavorito(idReceta) {
+  const idValido = Number.isInteger(idReceta);
+
+  const [guardado, setGuardado] = useState(false);
+  const [cargandoInicial, setCargandoInicial] = useState(idValido);
+  const [procesando, setProcesando] = useState(false);
   const [mensaje, setMensaje] = useState(SIN_MENSAJE);
 
+  // Estado inicial desde el servidor.
   useEffect(() => {
-    if (!idsValidos) {
-      return;
-    }
+    if (!idValido) return;
     let vigente = true;
 
-    consultarFavorito(idUsuario, idReceta)
-      .then((encontrado) => {
-        if (vigente) setFavorito(encontrado);
+    comunidadService
+      .esFavorito(idReceta)
+      .then((esFav) => {
+        if (vigente) setGuardado(esFav);
       })
       .catch((error) => {
-        if (vigente) {
-          setMensaje({ texto: "No fue posible consultar tus favoritos.", esError: true });
-        }
-        console.error(error);
+        if (vigente) setMensaje(mensajeDeError(error));
       })
       .finally(() => {
-        if (vigente) setCargando(false);
+        if (vigente) setCargandoInicial(false);
       });
 
     return () => {
       vigente = false;
     };
-  }, [idUsuario, idReceta, idsValidos]);
+  }, [idReceta, idValido]);
 
   const alternar = async () => {
-    setCargando(true);
+    if (procesando || !idValido) return;
+
+    const estadoAnterior = guardado;
+    // Actualización optimista: el botón cambia al instante, sin recargar.
+    setGuardado(!estadoAnterior);
+    setProcesando(true);
+    setMensaje(SIN_MENSAJE);
+
     try {
-      if (favorito === null) {
-        const nuevo = await agregarFavorito(idUsuario, idReceta);
-        setFavorito(nuevo);
-        setMensaje({ texto: "Receta guardada en tus favoritos.", esError: false });
-      } else {
-        await eliminarFavorito(favorito.id);
-        setFavorito(null);
-        setMensaje({ texto: "Receta quitada de tus favoritos.", esError: false });
-      }
-    } catch (error) {
+      const nuevoEstado = await comunidadService.alternarFavorito(idReceta);
+      setGuardado(nuevoEstado);
       setMensaje({
-        texto: "No fue posible actualizar tus favoritos. Intenta de nuevo.",
-        esError: true,
+        texto: nuevoEstado
+          ? "Receta guardada en tus favoritos."
+          : "Receta quitada de tus favoritos.",
+        esError: false,
       });
-      console.error(error);
+    } catch (error) {
+      // Si falla la conexión o la sesión, se revierte el cambio visual.
+      setGuardado(estadoAnterior);
+      setMensaje(mensajeDeError(error));
     } finally {
-      setCargando(false);
+      setProcesando(false);
     }
   };
 
-  if (!idsValidos) {
+  if (!idValido) {
     return {
       guardado: false,
-      cargando: true,
-      mensaje: { texto: "Los datos del botón de favorito no son válidos.", esError: true },
+      bloqueado: true,
+      mensaje: { texto: "La receta indicada no es válida.", esError: true },
       alternar,
     };
   }
 
-  return { guardado: favorito !== null, cargando, mensaje, alternar };
+  return {
+    guardado,
+    bloqueado: cargandoInicial || procesando,
+    mensaje,
+    alternar,
+  };
 }
