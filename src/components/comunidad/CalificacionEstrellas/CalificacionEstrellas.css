@@ -1,0 +1,38 @@
+.valoracion {
+  --estrella-activa: #f1c85c;
+  --estrella-borde: #3f4040;
+  --estrella-foco: #215b33;
+}
+
+.estrellas {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.estrella {
+  background: none;
+  border: 0;
+  padding: 0.25rem;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.estrella-icono {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--estrella-borde);
+}
+
+.estrella.activa .estrella-icono {
+  color: var(--estrella-activa);
+}
+
+.estrella:focus-visible {
+  outline: 3px solid var(--estrella-foco);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.puntuacion {
+  margin: 0.5rem 0 0;
+}

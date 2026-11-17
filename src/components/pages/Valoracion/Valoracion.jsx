@@ -1,20 +1,21 @@
 import "../../../assets/estilos.css";
-
+import EstadoComunidad from "../../comunidad/EstadoComunidad/EstadoComunidad";
+import CalificacionEstrellas from "../../comunidad/CalificacionEstrellas/CalificacionEstrellas";
+import BotonFavorito from "../../comunidad/BotonFavorito/BotonFavorito";
 
 function Valoracion() {
   return (
-    <>
-     
-      <main className="contenedor pagina-modulo">
-        <section className="bloque-modulo">
-          <h1>Módulo Comunidad</h1>
-          <p>Base lista para desarrollar historias de usuario de comunidad.</p>
-          <div id="comunidad-estado" className="mensaje-estado" role="status"></div>
-        </section>
-      </main>
-     
-    </>
-  )
+    <section className="contenedor pagina-modulo">
+      <EstadoComunidad />
+
+      <CalificacionEstrellas />
+
+      <section className="bloque-modulo" aria-labelledby="favorito-titulo">
+        <h2 id="favorito-titulo">Favoritos</h2>
+        <BotonFavorito idUsuario={1} idReceta={3} />
+      </section>
+    </section>
+  );
 }
 
-export default Valoracion
+export default Valoracion;
